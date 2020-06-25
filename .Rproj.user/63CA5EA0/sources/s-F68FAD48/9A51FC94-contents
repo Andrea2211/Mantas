@@ -1,23 +1,12 @@
 setwd ("/Users/AndreaMontero/Desktop/Mantas")
-#Crear objeto Genind (analisis global)
-Matriz_alelos_unidos <- read.csv("/Users/AndreaMontero/Desktop/Mantas/mantas.csv", header=TRUE, sep=",")
-Matriz_alelos_unidos_Genind <- df2genind(Matriz_alelos_unidos[,-1:-2], ind.names = Matriz_alelos_unidos$X, pop=Matriz_alelos_unidos$pop, sep="-", ploidy = 2)
-summary(Matriz_alelos_unidos_Genind)
-Matriz_alelos_unidos_Genind
 
-#Crear objeto Genpop (analisis por localidades)
-Matriz_alelos_unidos_Genind2 <- Matriz_alelos_unidos_Genind
-pop(Matriz_alelos_unidos_Genind2) <- Matriz_alelos_unidos$pop
-pop(Matriz_alelos_unidos_Genind2)
-summary(Matriz_alelos_unidos_Genind2)
-Matriz_alelos_unidos_Genpop <- genind2genpop(Matriz_alelos_unidos_Genind2)
-Matriz_alelos_unidos_Genpop
-summary(Matriz_alelos_unidos_Genpop)
+Data <- read.csv("/Users/AndreaMontero/Desktop/Mantas/tabla.csv", header=TRUE, sep=";")
+###Ver formato de archivo en la compu de escritorio
 
 library(diveRsity)
-data(Test_data)
 
-div_results <- fastDivPart(infile = Test_data, outfile = "Test",
+
+div_results <- fastDivPart(infile = Data, outfile = "Test",
                            gp = 3, pairwise = FALSE,
                            fst = FALSE, bs_locus = FALSE, bs_pairwise = FALSE,
                            boots = 0, plot = FALSE, para = FALSE)

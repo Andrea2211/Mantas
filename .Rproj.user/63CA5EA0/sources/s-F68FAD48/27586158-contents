@@ -1,0 +1,519 @@
+#Script R: An??lisis de Diversidad Gen??tica Mortino en la Sierra Ecuatoriana (completo-sin modificar)
+
+install.packages("ade4")
+install.packages("adegenet")
+install.packages("ape")
+install.packages("pegas")
+install.packages("hierfstat")
+install.packages("diveRsity")
+install.packages("ggfortify")
+install.packages("ggplot2")
+install.packages("phyloseq")
+install.packages("cluster")
+install.packages("ggthemes")
+install.packages("ggtree")
+install.packages("Hmisc")
+install.packages("PopGenReport")
+install.packages("knitr")
+install.packages("poppr")
+install.packages("devtools")
+install_github('fawda123/ggtree')
+install.packages("poppr")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("phyloseq", version = "3.8")
+install.packages("VennDiagram")
+install.packages("vegan")
+install.packages("curl")
+install.packages( c("RgoogleMaps",
+                    "geosphere",
+                    "proto",
+                    "sampling",
+                    "seqinr",
+                    "spacetime",
+                    "spdep"), 
+                  dependencies=TRUE )
+
+library(devtools)
+install_github("dyerlab/popgraph")
+install_github("dyerlab/gstudio")
+5
+library(popgraph)
+library(gstudio)
+
+library(VennDiagram)
+library(vegan)
+library(ade4)
+library(adegenet)
+library(ape)
+library(pegas)
+library(hierfstat)
+library(diveRsity)
+library(ggfortify)
+library(ggplot2)
+library(phyloseq)
+library(cluster)
+library(ggthemes)
+library(ggtree)
+library(Hmisc)
+library(PopGenReport)
+library(knitr)
+library("poppr")
+biocLite("ggtree")
+library("devtools")
+library("ggord")
+library("poppr")
+library("treeio")
+library(gstudio)
+
+#Crear objeto Genind (analisis global)
+Matriz_alelos_unidos <- read.csv("/Users/AndreaMontero/Desktop/Mantas-R/mantas1.csv", header=TRUE, sep=",")
+Matriz_alelos_unidos_Genind <- df2genind(Matriz_alelos_unidos[,-1:-2], ind.names = Matriz_alelos_unidos$X, pop=Matriz_alelos_unidos$pop, sep="-", ploidy = 2)
+summary(Matriz_alelos_unidos_Genind)
+Matriz_alelos_unidos_Genind
+
+
+"Matriz_R_verano_(clusters)_(1)"
+
+#NUMERO DE ALELOS VS NUMERO DE ALELOS POR LOCUS
+MAU<-summary(Matriz_alelos_unidos_Genind)
+MAU
+barplot(MAU$loc.n.all,ylab="Number of alleles", main="Number of alleles per locus")
+barplot(MAU$Hexp-MAU$Hobs, main="Heterozygosity: expected-observed", ylab="Hexp-Hobs")
+
+barplot(MAU$pop.n.all,ylab="Number of alleles", main="Number of alleles per cluster")
+
+
+#Alelos nulos
+
+null<-null.all(Matriz_alelos_unidos_Genind)
+null$null.allele.freq
+sum2<-null$null.allele.freq$summary2
+sum2
+write.csv(sum2,"/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/sum2.csv")
+
+
+#An??lisis por localidades
+
+#Crear objeto Genpop (analisis por localidades)
+Matriz_alelos_unidos_Genind2 <- Matriz_alelos_unidos_Genind
+pop(Matriz_alelos_unidos_Genind2) <- Matriz_alelos_unidos$pop
+pop(Matriz_alelos_unidos_Genind2)
+summary(Matriz_alelos_unidos_Genind2)
+Matriz_alelos_unidos_Genpop <- genind2genpop(Matriz_alelos_unidos_Genind2)
+Matriz_alelos_unidos_Genpop
+summary(Matriz_alelos_unidos_Genpop)
+
+
+#Hetero. esperadas por poblacion
+Hs(Matriz_alelos_unidos_Genind2, pop=NULL)
+Hes<-Hs(Matriz_alelos_unidos_Genind2, pop=NULL)
+Hes
+write.csv(Hes,"/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/Heterocigosidad.csv")
+
+
+
+#Hetero. observadas por poblacion
+Stats<-basic.stats(Matriz_alelos_unidos_Genind2)
+Ho<-Stats$Ho
+colMeans(Ho,na.rm = TRUE,dims = 1)
+
+
+
+
+#Hetero. observadas por poblacion
+Ho<-Stats$Ho
+colMeans(Ho,na.rm = TRUE,dims = 1)
+
+#Distancias geneticas de las poblaciones 
+Distancias_MortinoPOP <- dist.genpop(Matriz_alelos_unidos_Genpop,method=1)
+Distancias_MortinoPOP
+
+nj(Distancias_MortinoPOP)
+plot.phylo(nj)
+
+#Ploting PCoA por poblaciones
+autoplot(prcomp(Distancias_MortinoPOP), label=TRUE, label.size=3.5, shape=FALSE) + theme_linedraw() + ggtitle("Principal Coordinate Analysis (Populations)")
+
+
+
+
+#Ploting PCoA por poblaciones
+
+#PCoA basico (explicativo)
+autoplot(prcomp(Distancias_MortinoPOP), label=TRUE, label.size=3.5, shape=FALSE) + theme_linedraw() + ggtitle("Principal Coordinate Analysis (Populations)")
+
+#PCoA con elipses
+cor(pco.mor$li)^2
+s.class(pco.mor$li, fac=pop(Matriz_alelos_unidos_Genind2), col=c("chartreuse","yellow","red","blue"),cellipse = 1.5, axesell = TRUE, clabel = 1, cpoint = 1, pch = 20,grid = FALSE, addaxes = TRUE, origin = c(0,0),include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft",cgrid = 1, pixmap = NULL, contour = NULL, area = NULL)
+s.class(pco.mor$li, fac=pop(Matriz_alelos_unidos_Genind2), col=c("chartreuse","chartreuse","chartreuse","yellow","yellow","chartreuse","blue","blue","blue","red","red","red","yellow","red","chartreuse","yellow","red","red","red","blue","blue","blue","yellow","red","red","yellow","yellow"), cellipse = 1.5, axesell = TRUE, clabel = 1, cpoint = 1, pch = 20,grid = FALSE, addaxes = TRUE, origin = c(0,0),include.origin = TRUE, sub = "", csub = 1, possub = "bottomleft",cgrid = 1, pixmap = NULL, contour = NULL, area = NULL, add.plot = TRUE)
+
+
+#Neighbord Joinging por poblaciones
+ArbolNJ_Matriz <- bionj(Distancias_MortinoPOP)
+head(ArbolNJ_Matriz)
+bootstrap<-boot.phylo(phy=ArbolNJ_Matriz,X,FUN = function(bionj) nj(Distancias_MortinoPOP),B=100)
+plot.phylo(ArbolNJ_Matriz,type="unrooted",use.edge.length = FALSE,no.margin = TRUE,show.tip.label = TRUE,show.node.label = TRUE,edge.color = "black",root.edge = TRUE,align.tip.label = TRUE)
+
+#Neighbord Joinging por poblaciones
+ArbolNJ_Matriz <- bionj(Distancias_MortinoPOP)
+plot.phylo(ArbolNJ_Matriz,type="unrooted",use.edge.length = FALSE,no.margin = TRUE,show.tip.label = TRUE,show.node.label = TRUE,edge.color = "black",root.edge = TRUE,ladderize = TRUE, align.tip.label = TRUE)
+
+ArbolNJ_Matriz <- bionj(Distancias_MortinoPOP)
+plot.phylo(ArbolNJ_Matriz,type = "unrooted",no.margin = TRUE,show.tip.label = TRUE,show.node.label = TRUE,edge.color = "black",root.edge = TRUE,tip.color =c("chartreuse","chartreuse","chartreuse","yellow","yellow","chartreuse","blue","blue","blue","red","red","red","yellow","red","chartreuse","yellow","red","red","red","blue","blue","blue","yellow","red","red","yellow","yellow"),layout=2,align.tip.label = TRUE)
+
+ArbolNJ_Matriz <- bionj(Distancias_MortinoPOP)
+plot.phylo(ArbolNJ_Matriz,no.margin = TRUE,show.tip.label = TRUE,show.node.label = TRUE,edge.color = "black",root.edge = TRUE,align.tip.label = TRUE)
+
+ggtree(ArbolNJ_Matriz,mapping = NULL, open.angle = 1,mrsd = NULL, as.Date = FALSE, yscale = "none", yscale_mapping = NULL,ladderize = TRUE, right = TRUE, branch.length = "none")
+
+apeBoot(ArbolNJ_Matriz,boot = 100)
+
+boot.phylo(ArbolNJ_Matriz,X,FUN = nj(dist.genpop(Matriz_alelos_unidos_Genpop,method = 1)),B = 100, block = 1,
+           trees = FALSE, quiet = FALSE,
+           rooted = is.rooted(phy), jumble = TRUE,
+           mc.cores = 1)
+
+boot.phylo(ArbolNJ_Matriz, X, FUN, B = 100, block = 1,
+           trees = FALSE, quiet = FALSE,
+           rooted = is.rooted(phy), jumble = TRUE,
+           mc.cores = 1)
+
+plot.phylo(ArbolNJ_Matriz,no.margin = TRUE,show.tip.label = TRUE,show.node.label = TRUE,edge.color = "black",root.edge = TRUE,tip.color =c("chartreuse","chartreuse","chartreuse","yellow","yellow","chartreuse","blue","blue","blue","red","red","red","yellow","red","chartreuse","yellow","red","red","red","blue","blue","blue","yellow","red","red","yellow","yellow"),layout=2,align.tip.label = TRUE)
+
+
+
+
+#Fst's
+fstat(Matriz_alelos_unidos_Genind, pop=pop(Matriz_alelos_unidos_Genind2),fstonly = TRUE)
+pairwise.fst(Matriz_alelos_unidos_Genind, pop=pop(Matriz_alelos_unidos_Genind2))
+
+DistNeiMatrix<-pairwise.fst(Matriz_alelos_unidos_Genind, pop=pop(Matriz_alelos_unidos_Genind2))
+DistNeiMatrix
+
+#Cluster
+hc <- hclust(dist(Matriz_alelos_unidos_Genind), method = "complete")
+CC<-cophenetic(hc)
+CC
+plot(CC)
+plot(hc)
+
+#An??lisis por individuos
+
+#Distancias geneticas por individuo
+Distancias_MortinoInd <- dist(Matriz_alelos_unidos_Genind, method="euclidean")
+Distancias_MortinoInd
+
+# PCoA por INDividuos
+autoplot(prcomp(Distancias_MortinoInd), data=Matriz_alelos_unidos, colour="pop", label=FALSE)
+
+#PCOA multidimesnional (VERSION MEJORADA) COLORES PAPER
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("1","2"),arrow=NULL, vec_ext=0, ellipse=FALSE, txt=NULL,col=c("darkred","darkseagreen","gold","firebrick","gold2","deepskyblue3","mediumseagreen","deeppink","pink","palevioletred3","peru","tomato","violetred2","steelblue1","yellowgreen","orange","oldlace","maroon","magenta2","navyblue","mediumpurple1","lightsteelblue2","lightslateblue","palegoldenrod","royalblue1","peachpuff3","springgreen3")) # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+#PCOA multidimesnional (VERSION MEJORADA)
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("1","2"),arrow=NULL, vec_ext=0, ellipse=FALSE, txt=NULL,colour="pop") # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("1","2"),arrow=NULL, vec_ext=0, ellipse=TRUE, txt=NULL,colour="pop") # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("2","3"),arrow=NULL, vec_ext=0, ellipse=FALSE, txt=NULL,col=c("darkgoldenrod1","lightseagreen","firebrick","indianred2","dodgerblue4")) # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+lightcoral
+darkolivegreen3
+steelblue1
+darkorchid1
+
+#PCOA multidimesnional (VERSION MEJORADA) ELIPSES COLORES STRUCTURE
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("1","3"),arrow=NULL, vec_ext=0, ellipse=TRUE, txt=NULL,col=c("red","yellow","chartreuse","blue")) # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+#PCOA multidimesnional (VERSION MEJORADA)
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("1","2"),arrow=NULL, vec_ext=0, ellipse=FALSE,txt=NULL,size=3,col=c("brown1","darkolivegreen1","yellow","red","yellow","blue","chartreuse","red","red","red","yellow","red","red","blue","chartreuse","yellow","yellow","red","red","blue","red","blue","blue","yellow","blue","yellow","chartreuse")) 
+PCOA_Multi
+
+# en axes =, los numeritos son los ejes/PC que se quieren
+
+
+Ord<-prcomp(Distancias_MortinoInd)
+PCoA_Multi<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,size=4)
+PCoA_Multi
+
+PCoA_Multi_regiones<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,col=c("red","aquamarine","yellow","red","yellow","blue","cadetblue4","red","red","red","yellow","red","red","blue","cornflowerblue","yellow","yellow","red","red","blue","red","blue","blue","yellow","blue","yellow","chartreuse"))
+PCoA_Multi_regiones
+
+PCoA_Multi_colores<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,col=c("darkorchid","cornflowerblue","darkgoldenrod1","deeppink","khaki1","palegreen","aquamarine","hotpink","hotpink4","indianred4","orange","lightpink","mediumpurple1","palegreen4","deepskyblue3","yellow","gold","plum2","rosybrown3","green","salmon","forestgreen","darkolivegreen3","darkorange3","chartreuse4","lightgoldenrodyellow","blue4"))
+PCoA_Multi_colores
+
+PCoA_Multi<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("2","3"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,col=c
+                          ("lightcoral","lightgoldenrod1","darkolivegreen3","lightcoral","darkolivegreen3","lightgoldenrod1",
+                            "lightgoldenrod1","lightcoral","lightcoral","lightcoral","darkorchid1","lightcoral","darkorchid1",
+                            "steelblue1","darkorchid1","darkolivegreen3","darkolivegreen3","darkolivegreen3","lightcoral","lightgoldenrod1","lightcoral","steelblue1",
+                            "steelblue1","darkorchid1","lightgoldenrod1","darkolivegreen3","lightgoldenrod1"))
+PCoA_Multi
+
+lightcoral
+darkolivegreen3
+steelblue1
+darkorchid1
+darkolivegreen1
+coral
+
+darkorchid1
+lightgoldenrod1
+
+
+
+#PCOA multidimesnional (VERSION MEJORADA)
+Ord <- prcomp(Distancias_MortinoInd) #Entre () va la matriz de Distancias geneticas
+PCOA_Multi <- ggord(Ord, Matriz_alelos_unidos$pop, axes = c("2","3"),arrow=NULL, vec_ext=0, ellipse=FALSE, txt=NULL,col=c("red","chartreuse","yellow","darkmagenta","gold4","blue","forestgreen","deeppink","pink","palevioletred3","peru","tomato","violetred2","steelblue1","yellowgreen","orange","oldlace","maroon","magenta2","navyblue","mediumpurple1","lightsteelblue2","lightslateblue","palegoldenrod","royalblue1","peachpuff3","springgreen3")) # en axes =, los numeritos son los ejes/PC que se quieren
+PCOA_Multi
+
+# Analisis DPCA / Pairwise distances grafico 
+grp <- find.clusters(Matriz_alelos_unidos_Genind, max.n.clust=20)
+8
+4
+grp$grp
+pairDistPlot(Distancias_MortinoInd, grp$grp)
+dapcGSC <- dapc(Matriz_alelos_unidos_Genind, grp$grp)
+scatter(dapcGSC,col = c("blue","chartreuse","yellow","red"),label = c("Regi??n 3","Regi??n 4","Regi??n 2","Regi??n 1"))
+
+
+
+compoplot(dapcGSC,only.grp = NULL, border = NA)
+
+dapc(Matriz_alelos_unidos_Genind, grp=4, n.pca=NULL, n.da=NULL, center=TRUE,
+     scale=FALSE, var.contrib=TRUE, var.loadings=FALSE, pca.info=TRUE,
+     pca.select=c("nbEig"), perc.pca=NULL, dudi=NULL)
+4
+4
+
+#Ploting PCoA por individuos
+
+autoplot(prcomp(Distancias_MortinoInd), data=Matriz_alelos_unidos, colour="pop") + ggtitle("PCoA por individuos")
+View(pc1)
+
+Ord<-prcomp(Distancias_MortinoInd)
+PCoA_Multi<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE)
+PCoA_Multi
+
+PCoA_Multi_regiones<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,col=c("red","aquamarine","yellow","red","yellow","blue","cadetblue4","red","red","red","yellow","red","red","blue","cornflowerblue","yellow","yellow","red","red","blue","red","blue","blue","yellow","blue","yellow","chartreuse"))
+PCoA_Multi_regiones
+
+PCoA_Multi_colores<-ggord(Ord,Matriz_alelos_unidos$pop,axes = c("1","2"),arrow=NA,vec_ext=0,txt=NULL,ellipse=FALSE,col=c("darkorchid","cornflowerblue","darkgoldenrod1","deeppink","khaki1","palegreen","aquamarine","hotpink","hotpink4","indianred4","orange","lightpink","mediumpurple1","palegreen4","deepskyblue3","yellow","gold","plum2","rosybrown3","green","salmon","forestgreen","darkolivegreen3","darkorange3","chartreuse4","lightgoldenrodyellow","blue4"))
+PCoA_Multi_colores
+
+#Arbol_NJ por INdividuo
+ArbolNJ_Mortino_Ind <- bionj(Distancias_MortinoInd)
+plot.phylo(ArbolNJ_Mortino_Ind, type="unrooted",use.edge.length = TRUE,node.pos = TRUE,edge.color = funky(27))
+?plot.phylo
+
+
+#An??lisis por regiones
+
+#Crear objeto Genind (analisis global) por region 
+Matriz_alelos_unidos5 <- read.csv("/Users/pamelavega31/Documents/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/R_studio/Matrices/Matriz_17_10-02.csv", header=TRUE, sep=";")
+Matriz_alelos_unidos_Genind5 <- df2genind(Matriz_alelos_unidos5[,-1:-2], ind.names = Matriz_alelos_unidos5$X, pop=Matriz_alelos_unidos5$pop, sep="-", ploidy = 2)
+summary(Matriz_alelos_unidos_Genind5)
+Matriz_alelos_unidos_Genind5
+
+#Crear objeto Genpop (analisis por regiones)
+Matriz_alelos_unidos_Genind5 <- Matriz_alelos_unidos_Genind5
+pop(Matriz_alelos_unidos_Genind5) <- Matriz_alelos_unidos5$pop
+pop(Matriz_alelos_unidos_Genind5)
+Matriz_alelos_unidos_Genpop5 <- genind2genpop(Matriz_alelos_unidos_Genind5)
+Matriz_alelos_unidos_Genpop5
+summary(Matriz_alelos_unidos_Genpop5)
+
+#Distancias geneticas de las regiones
+Distancias_MortinoPOP5 <- dist.genpop(Matriz_alelos_unidos_Genpop5, method=1)
+Distancias_MortinoPOP5
+
+#Ploting PCoA por regiones
+autoplot(prcomp(Distancias_MortinoPOP5), label=TRUE, label.size=2, shape=FALSE) + theme_solarized() + ggtitle("PCoA por Localidades")
+
+#Alelos_privados
+private_mor<-private_alleles(Matriz_alelos_unidos_Genind2,report ="table",count.alleles = FALSE)
+private_mor
+View(private_mor)
+write.csv(private_mor,"/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/mort_private.csv")
+
+moralleles<-allele.count(Matriz_alelos_unidos_Genind2,diploid = TRUE)
+moralleles
+View(moralleles)
+
+#Sacar frecuencias
+AMFAU<-makefreq(Matriz_alelos_unidos_Genind2, quiet=FALSE, missing=NA, truenames=TRUE)
+View(AMFAU)
+write.csv(AMFAU,"/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/mort_FREQUENCIES.csv")
+
+
+#PIC
+install.packages("polysat")
+library("polysat")
+poblaciones<-c("Toreadora","Cajas","Cruces","Cebapamba","Salinas","Salinas Norte","San Miguel","Cerro Abuga","Surimpalti","El Angel","San Gabriel","La Cofradia","Quimiac","PNC","Quilotoa","Sigchos","Cuicocha","Santa Lucia","Cahuasqui","Saraguro","Podocarpus","Santiago","Lloa","Cayambe","Mojanda","Carihuairazo","Tisandeo")
+myfreq<-data.frame(row.names=c("pop1","pop2","pop3","pop4","pop5","pop6","pop7","pop8","pop9","pop10","pop11","pop12","pop13","pop14","pop15","pop16","pop17","pop18","pop19","pop10","pop21","pop22","pop23","pop24","pop25","pop26","pop27"), Genomes=c(4,3,3,4,3,3,3,3,4,4,3,3,7,4,4,3,4,3,4,3,4,3,4,3,4,5,5), loc1.345=as.vector(AMFAU$M001.345), loc1.351=as.vector(freq_mor$M001.351), loc1.327=as.vector(freq_mor$M001.327), loc1.363=as.vector(freq_mor$M001.363), loc1.321=as.vector(freq_mor$M001.321), loc1.357=as.vector(freq_mor$M001.357), loc1.369=as.vector(freq_mor$M001.369), loc1.333=as.vector(freq_mor$M001.333),loc1.339=as.vector(freq_mor$M001.339),loc1.375=as.vector(freq_mor$M001.375))
+
+#AMOVA (13% en arlequin)
+amovaResult <- poppr.amova(Matriz_alelos_unidos_Genind, ~pop, missing = "ignore",within = FALSE)
+amovaResult 
+
+library(ade4)
+
+amova<-
+
+set.seed(1999)
+Aeutsignif   <- randtest(amovaResult, nrepet = 999)
+Aeutsignif 
+Aeutccsignif <- randtest(Aeutamovacc, nrepet = 999)
+
+pops <- as.data.frame(Matriz_alelos_unidos$pop)
+strata(Matriz_alelos_unidos_Genind)<-pops
+amova1 <- poppr.amova(Matriz_alelos_unidos_Genind, hier =  ~Matriz_alelos_unidos.pop, clonecorrect = FALSE, within = TRUE, dist = NULL, squared = TRUE, correction = "quasieuclid", filter = TRUE, threshold = 0, algorithm = "farthest_neighbor", missing = "loci", cutoff= 0.05, quiet = FALSE, method = c("ade4"), nperm = 0)
+amova1
+plotdata <- amovaResult$componentsofcovariance[-3,]
+pie(plotdata$"%")
+
+#Inbreeding
+Fsamp <-inbreeding(Matriz_alelos_unidos_Genind, pop=pop(Matriz_alelos_unidos_Genind2), truenames = TRUE, N=300)
+Fmean=sapply(Fsamp, mean)
+Fmean
+hist(Fmean, col="orange", xlab="mean value of F",
+     main="Distribution of mean F across individuals")
+plot(Fmean, ylab = "F", col = "blue", main = "comparison of MLE and average sample estimates of F")
+
+inbreeding(Matriz_alelos_unidos_Genind2, pop = NULL, truenames = TRUE, 
+           res.type = c("sample", "function", "estimate"), N = 200, M = N * 10)
+
+#Equilibrio H-W
+Mortino.hwt <- hw.test(Matriz_alelos_unidos_Genind, B=0)
+Mortino.hwt
+
+HWEt <- hw.test(Matriz_alelos_unidos_Genind, pop=Matriz_alelos_unidos$pop, B=10000)
+HWEtDF <- as.data.frame(HWEt)
+HWEtDF
+class(HWEtDF)
+p.adjust(HWEtDF$Pr.exact, method = "bonferroni")
+
+
+#RED_MIGRACION
+
+Matriz_alelos_unidos_Genpop
+
+#Migracion Relativa
+divMigrate(infile = Matriz_alelos_unidos_Genpop, stat = "all", filter_threshold = 0, plot_network = T, plot_col = "darkblue", para = FALSE)
+
+
+migra_mortino<-divMigrate(infile = "/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/genpop_mortino(4grupos).txt",outfile = NULL,stat = "all",filter_threshold = 0.2, plot_network = TRUE, plot_col = "darkorchid4",para = FALSE)
+
+
+divMigrate(infile = Matriz_alelos_unidos_Genpop, stat = "all", filter_threshold = 0, plot_network = T, plot_col = "darkblue", para = FALSE)
+
+divBasic(infile="/Users/pamelavega31/Documents/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/genpop_mortino(27).txt",outfile=NULL, gp = 2, bootstraps = NULL)
+
+#VennDiagram
+
+d<-read.csv("/Users/pamelavega31/Desktop//Clusters(binario).csv",header=TRUE, sep=";")
+
+nrow(subset(d, Cluster1 == 1))
+nrow(subset(d, Cluster2 == 1))
+nrow(subset(d, Cluster3 == 1))
+nrow(subset(d, Cluster4 == 1))
+
+nrow(subset(d, Cluster1 == 1 & Cluster2 == 1))
+nrow(subset(d, Cluster1 == 1 & Cluster3 == 1))
+nrow(subset(d, Cluster2 == 1 & Cluster3 == 1))
+
+nrow(subset(d, Cluster1 == 1 & Cluster4 == 1))
+nrow(subset(d, Cluster2 == 1 & Cluster4 == 1))
+nrow(subset(d, Cluster3 == 1 & Cluster4 == 1))
+
+nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1))
+nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster4 == 1))
+nrow(subset(d, Cluster1 == 1 & Cluster3 == 1 & Cluster4 == 1))
+nrow(subset(d, Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1))
+
+nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1))
+
+grid.newpage()
+draw.triple.venn(area1 = nrow(subset(d, Cluster1 == 1)), area2 = nrow(subset(d, Cluster2 == 1.5)), area3 = nrow(subset(d, Cluster3 == 0.5)), n12 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1.5)), n23 = nrow(subset(d, Cluster1 == 1 & Cluster3 == 0.5)), n13 = nrow(subset(d,Cluster2 == 1.5 & Cluster3 == 0.5)), n123 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1.5 & Cluster3 == 0.5)), category = c("Cluster 1", "Cluster 2", "Cluster 3"), lty = "blank",fill = c("skyblue", "pink1", "mediumorchid"))
+
+draw.quad.venn(area1 = nrow(subset(d, Cluster1 == 1)), area2 = nrow(subset(d, Cluster2 == 1)), area3 = nrow(subset(d, Cluster3 == 1)), area4 = nrow(subset(d, Cluster4 == 1)), n12 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1)), n13 = nrow(subset(d, Cluster1 == 1 & Cluster3 == 1)), n23 = nrow(subset(d,Cluster2 == 1 & Cluster3 == 1)),n14 = nrow(subset(d, Cluster1 == 1 & Cluster4 == 1)),n24 = nrow(subset(d, Cluster2 == 1 & Cluster4 == 1)),n34 = nrow(subset(d, Cluster3 == 1 & Cluster4 == 1)),n123 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1)),n124 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster4 == 1)),n134 = nrow(subset(d, Cluster1 == 1 & Cluster3 == 1 & Cluster4 == 1)),n234 = nrow(subset(d, Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1)),n1234 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1)) , category = c("Cluster 1", "Cluster 2", "Cluster 3","Cluster 4"), lty = "blank",fill = c("skyblue", "pink1", "mediumorchid","orange"))
+
+draw.quad.venn(area1 = nrow(subset(d, Cluster1 == 1)), area2 = nrow(subset(d, Cluster2 == 1)), area3 = nrow(subset(d, Cluster3 == 1)), area4 = nrow(subset(d, Cluster4 == 1)), n12 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1)), n13 = nrow(subset(d, Cluster1 == 1 & Cluster3 == 1)), n14 = nrow(subset(d, Cluster1 == 1 & Cluster4 == 1)), n23 = nrow(subset(d, Cluster2 == 1 & Cluster3 == 1)), n24 = nrow(subset(d, Cluster2 == 1 & Cluster4 == 1)), n34 = nrow(subset(d, Cluster3 == 1 & Cluster4 == 1)), n123 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1)), n124 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster4 == 1)), n234 = nrow(subset(d, Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1)), n134 = nrow(subset(d, Cluster1 == 1 & Cluster3 == 1 & Cluster4 == 1)), n1234 = nrow(subset(d, Cluster1 == 1 & Cluster2 == 1 & Cluster3 == 1 & Cluster4 == 1)) , category = c("Cluster 1", "Cluster 2", "Cluster 3","Cluster 4"), lty = "blank",fill = c("lightcoral", "darkolivegreen3", "steelblue1","darkorchid1"))
+
+lightcoral
+darkolivegreen3
+steelblue1
+darkorchid1
+
+#Mantel test
+library(vegan)
+
+altitude<-read.table("/Users/pamelavega31/Desktop/Matriz_altitud.csv",sep = ";",header = TRUE)
+head(altitude,n=100)
+
+altitude.dists<-dist(altitude$Altitude)
+as.matrix(altitude.dists)[1:100,1:100]
+
+DistNeiMatrix
+as.matrix(DistNeiMatrix)
+
+mantel(altitude.dists,Distancias_MortinoInd,method="spearman", permutations=10000)
+
+mantel<-mantel.test(altitude.dists,DistNeiMatrix,nperm = 999,graph = TRUE,alternative = "two.sided")
+
+geographic<-read.table("/Users/pamelavega31/Desktop/Matriz_dist_geo.csv",sep = ";",header = TRUE)
+head(geographic,n=100)
+
+geographic.dists<-dist(geographic$Lat,geographic$Lon,method = "maximum")
+as.matrix(geographic.dists)[1:100,1:100]
+
+mantel(geographic.dists,Distancias_MortinoInd,method="spearman", permutations=10000)
+
+#Estructura Poblacional
+
+install.packages("label.switching")
+install.packages("tcltk")
+
+library(devtools)
+library(ggplot2)
+library(gridExtra)
+library(gtable)
+library(tidyr)
+library(label.switching)
+
+devtools::install_github('royfrancis/pophelper')
+devtools::install_github('royfrancis/tcltk')
+install()
+library(pophelper)
+library(tcltk)
+
+setwd("Population_structure")
+setwd(choose.dir("/Users/pamelavega31/Desktop/Population_structure"))
+
+readQ("/Users/pamelavega31/Desktop/Population_structure/Results/100000,1000000_run_11_f.txt")
+indclumpp<-clumppExport("/Users/pamelavega31/Desktop/Population_structure/Results/100000,1000000_run_11_f.txt")
+
+#Inbreeding
+Fsamp <-inbreeding(Matriz_alelos_unidos_Genind, pop=pop(Matriz_alelos_unidos_Genind2), truenames = TRUE, N=300)
+Fmean=sapply(Fsamp, mean)
+Fmean
+hist(Fmean, col="orange", xlab="mean value of F",
+     main="Distribution of mean F across individuals")
+plot(Fmean, ylab = "F", col = "blue", main = "comparison of MLE and average sample estimates of F")
+
+
+#Diversos indices
+IndicesDiv<-divBasic(infile = "/Users/pamelavega31/Documents/OneDrive - Universidad San Francisco de Quito/OneDrive/1.USFQ/2.TESIS/Laboratorio/An??lisis_resultados/Programas/R_studio/Matrices/genpop_mortino(4grupos).txt", outfile = NULL, gp = 3, bootstraps = 100,HWEexact = FALSE, mcRep = 2000)
+
+IndicesDiv$locus_pop_size

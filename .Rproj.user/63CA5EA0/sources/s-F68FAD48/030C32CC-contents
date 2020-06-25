@@ -1,12 +1,20 @@
+##Script para hacer heatmaps de Gst vs D y boxplots de r estimados
+
+
 setwd ("/Users/AndreaMontero/Desktop/Mantas/Plots")
 
-Comb2<- read.csv("/Users/AndreaMontero/Desktop/Mantas/Plots/djost_gst_boot1000.csv", header=TRUE, sep=";")
+Comb<- read.csv("/Users/AndreaMontero/Desktop/Mantas/Plots/comb.csv", header=TRUE, sep=";")
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("reshape")
+library(reshape)
 
-head(Comb2)
 
-mat.heatmap.m = melt(Comb2)
+head(comb)
+
+mat.heatmap.m = melt(comb)
 head(mat.heatmap.m)
-ggplot(data = data.frame(mat.heatmap.m), aes(x = 1,2,3,4,5,6, y = variable, fill= value)) + geom_tile()
+ggplot(data = data.frame(mat.heatmap.m), aes(x = X,  y = variable, fill= value)) + geom_tile()
 
 ggplot(data = mat.heatmap.m, aes(X, variable, fill = value))+
   geom_tile(color = "white")+
